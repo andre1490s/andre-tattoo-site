@@ -395,3 +395,36 @@ Foi registrado no schema como `Person.name: "André Silva"` com
 | "Receba um link personalizado e QR code para convidar clientes a avaliar" | **Usar.** É a forma legítima de crescer as avaliações — gerar o link e mandar para quem já tatuou |
 | Botão "Agendar on-line" ativo no perfil | Conferir para onde aponta: o ideal é o WhatsApp ou o site, com parâmetro de origem para dar para medir |
 | "Adicione um mapa ao seu site" | O site já tem link para o mapa; um mapa incorporado é opcional e pesa na performance. Avaliar na fase 5 |
+
+---
+
+## Correção antes de ligar a Netlify ao repositório — `404.html`
+
+O André testou `andretattoo.com.br/realismo-preto-e-cinza`, viu o 404 e mandou o
+print. O 404 em si era esperado (a Netlify ainda não estava ligada ao
+repositório), **mas o print revelou outra coisa:** o site tem uma página 404
+customizada — "Linha perdida / 404" — que **não estava no repositório**.
+
+Por que escapou: eu montei a cópia do site seguindo os links de cada arquivo, e
+**nada no site aponta para o `404.html`**. Ele só aparece quando o servidor não
+acha o endereço.
+
+Se a Netlify tivesse sido ligada ao repositório antes dessa correção, essa página
+teria sumido e dado lugar ao 404 genérico da Netlify.
+
+### Varredura feita depois disso
+
+Procurei todos os arquivos que costumam existir sem estar linkados:
+
+| Arquivo | Existe no site? |
+|---|---|
+| `404.html` | **sim** — faltava, foi acrescentado |
+| `_redirects`, `_headers`, `netlify.toml` | não |
+| `manifest.json`, `site.webmanifest` | não |
+| `favicon.ico`, `humans.txt`, `browserconfig.xml`, `ads.txt` | não |
+
+E conferi que toda referência de todo HTML, CSS e JS aponta para um arquivo que
+existe no repositório: **nenhuma quebrada**.
+
+O `404.html` já tinha `noindex`, que é o correto. Só padronizei a marca para
+"André" no título, como no resto do site.
