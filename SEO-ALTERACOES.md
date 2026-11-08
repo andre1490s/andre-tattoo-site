@@ -101,10 +101,10 @@ As estrelas que aparecem na busca continuam vindo do Perfil da Empresa.
 
 | # | O quê | Impacto | Fase |
 |---|---|---|---|
-| 1 | **Galeria sai só por JavaScript** — as 12 fotos não existem no HTML servido. O próprio site tem `<noscript>` admitindo. Fora do Google Imagens. | 🔴 alto | 2 |
-| 2 | **FAQ schema também é injetado por JS** (`main.js:143`). Rastreadores de IA em geral não executam JavaScript — para eles, o FAQ não existe. | 🔴 alto | 2 |
-| 3 | **Imagens sem `width`/`height`** — risco de CLS | 🟠 médio | 2 |
-| 4 | **Textos ALT fracos** nas fotos do artista ("André tatuando um braço") | 🟠 médio | 2 |
+| 1 | ~~Galeria só por JavaScript~~ — **resolvido** pelo `build.py` | ✅ | 2 |
+| 2 | ~~FAQ schema injetado por JS~~ — **resolvido**: agora está no HTML | ✅ | 2 |
+| 3 | ~~Imagens sem `width`/`height`~~ — **resolvido**: lidos do arquivo pelo build | ✅ | 2 |
+| 4 | ~~ALT fracos na galeria~~ — **4 reescritos** após olhar as fotos. Os das fotos do artista ("André tatuando um braço") seguem genéricos | 🟡 baixo | 5 |
 | 5 | **Só 2 URLs** no site. Sem página de realismo, retrato, cobertura ou Zona Leste | 🔴 alto | 3 |
 | 6 | **Sem GA4 e sem Search Console** — nada é medido hoje | 🔴 alto | 4 |
 | 7 | **SVG de 47.878px** inline no HTML; **3 fontes externas** bloqueando render; vídeo `autoplay` no topo | 🟠 médio | 5 |
@@ -126,6 +126,101 @@ python3 -m http.server 8099
 
 Abra http://127.0.0.1:8099/ — o formulário não grava fora do servidor de produção,
 mas todo o resto funciona igual.
+
+---
+
+## Fase 2 — Tirar a galeria e o FAQ de dentro do JavaScript
+
+### O problema, em uma frase
+
+As 12 fotos do portfólio e as 4 dúvidas **não existiam no HTML**. Eram criadas
+por `js/main.js` depois que o navegador executava o JavaScript. O próprio site
+admitia isso num `<noscript>`:
+
+```html
+<noscript><p>Para ver a galeria, ative o JavaScript...</p></noscript>
+```
+
+Quem lê a página sem executar JavaScript — **Google Imagens** e os rastreadores
+de **ChatGPT, Gemini e Perplexity** — via uma caixa vazia. O portfólio, que é o
+maior ativo comercial do site, estava fora do jogo.
+
+### A solução: `build.py`
+
+Um script que lê o `js/dados.js` e **grava** a galeria, as dúvidas e o JSON-LD do
+FAQ dentro do `index.html`, entre marcadores:
+
+```
+python3 build.py
+```
+
+O `dados.js` continua sendo o único arquivo que você edita. O build só transforma
+o que está lá em HTML de verdade.
+
+### A rede de segurança
+
+Se você editar o `dados.js` e **esquecer de rodar o build**, nada quebra. O
+`main.js` compara quantas peças há no HTML com quantas há no `dados.js`:
+
+- **Números iguais** → não mexe em nada. O HTML manda, e os rastreadores enxergam.
+- **Números diferentes** → remonta a galeria sozinho, como fazia antes.
+
+O site continua certo para quem visita; só volta a ficar invisível para os
+rastreadores até o build rodar. **Testado:** removi uma peça do `dados.js` sem
+rodar o build e a página renderizou as 11 restantes, sem erro.
+
+O mesmo vale para o FAQ, com um cuidado a mais: o JSON-LD só é injetado pelo JS
+se o build **não** tiver gravado antes — dois `FAQPage` na mesma página confundem
+o Google.
+
+### Também nesta fase
+
+**`width` e `height` em todas as 12 fotos.** Lidos do arquivo real pelo build
+(todas 3:4). Isso elimina o salto de layout enquanto a imagem carrega — o CLS do
+Core Web Vitals.
+
+**Sitemap de imagens.** O `sitemap.xml` agora declara as 12 fotos com título e
+legenda, no padrão `image:image` do Google. É o caminho direto para o Google
+Imagens descobrir o portfólio.
+
+**4 textos ALT reescritos — depois de olhar cada foto, não de adivinhar:**
+
+| Foto | Antes | Depois |
+|---|---|---|
+| `fera` | "Peça em blackwork com sombreado em pontilhismo" | "**Dragão** em blackwork com sombreado em pontilhismo no antebraço" |
+| `rostos` | "Composição de rostos em realismo" | "Rostos de **estátuas gregas** em realismo preto e cinza, com efeito de **mármore partido**" |
+| `retrato` | "Retrato realista no braço" | "Retrato masculino **de boné** em realismo preto e cinza no braço, com o **Cristo Redentor** abaixo" |
+| `urso` | "Urso com lua e montanhas em realismo" | "Urso com lua e montanhas em realismo **preto e cinza**" |
+
+A legenda visível de `fera` também mudou de "Blackwork · Pontilhismo" para
+"Blackwork · Dragão". Os outros 8 ALT já eram bons e **não foram tocados** —
+não há ganho em reescrever o que já descreve bem.
+
+**`<noscript>` removido**, porque deixou de ser verdade.
+
+### Testes executados
+
+| Teste | Resultado |
+|---|---|
+| Fotos no HTML cru, sem JS | 12 ✓ |
+| Dúvidas no HTML cru | 4 ✓ |
+| `FAQPage` no HTML cru | sim ✓ |
+| Duplicação com JS ligado | nenhuma — 12 fotos, 4 dúvidas, 2 blocos JSON-LD ✓ |
+| Imagens sem `width`/`height` | 0 ✓ |
+| Lightbox ao clicar na foto | abre com a imagem e a legenda certas ✓ |
+| Acordeão do FAQ | abre um e fecha os outros ✓ |
+| Rede de segurança (dados.js fora de sincronia) | remontou sozinho, sem erro ✓ |
+| `build.py` rodado duas vezes | idempotente ✓ |
+| Erros de console | nenhum ✓ |
+
+### ⚠️ Mudança no seu fluxo de publicar tattoo nova
+
+Antes: editar `js/dados.js` e publicar.
+**Agora: editar `js/dados.js`, rodar `python3 build.py`, e publicar.**
+
+Se esquecer, o site funciona igual — só perde o ganho de SEO daquela foto até
+o build rodar. A skill `publicar-no-site`, no repositório `andre-tattoo-skill`,
+precisa ser atualizada para incluir esse passo.
 
 ---
 
