@@ -1,0 +1,446 @@
+/* =====================================================================
+   ANDRE TATTOO: folha de estilo
+   Layout: folha de papel clara, fotos P&B como impressões e uma linha de
+   agulha dourada costurando a página de cima a baixo.
+   ===================================================================== */
+
+:root{
+  --paper:#F3F1EC;
+  --paper-2:#E9E6DF;
+  --ink:#151311;
+  --ink-soft:#57524B;
+  --rule:#D6D1C7;
+  --gold:#A47D35;
+  --gold-soft:#C9A862;
+  --bloco:#DADCC2;      /* areia esverdeada dos blocos: quebra o branco sem dominar */
+  --display:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;
+  --body:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  --gut:max(20px, env(safe-area-inset-left, 0px));
+  --gut-r:max(20px, env(safe-area-inset-right, 0px));
+  --wrap:1180px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--paper)}
+img{display:block;max-width:100%}
+a{color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-left:var(--gut);padding-right:var(--gut-r)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.eyebrow b{color:var(--gold);font-weight:500}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.02;letter-spacing:-.01em}
+h2{font-size:clamp(38px,6vw,72px)}
+h2 em,h1 em{font-style:italic;color:var(--gold)}
+p{margin:0}
+
+/* ---------- LINHA DA AGULHA ----------
+   No celular (sem mouse) ela é a costura ligada à rolagem, e fica atrás das
+   seções: z-index negativo pinta antes dos fundos.
+   No PC vira um fio que segue o mouse: aí sobe para z-index 2, acima dos
+   fundos, e as fotos sobem para 3, o fio passa por baixo delas.
+   Para isso main/header/footer não podem ter z-index: com ele viram um bloco
+   só de empilhamento e nada de dentro conseguiria ficar acima do fio. */
+#needle{position:absolute;left:0;top:0;width:100%;pointer-events:none;z-index:-1;overflow:visible}
+#needle .track{fill:none;stroke:var(--rule);stroke-width:1;stroke-dasharray:2 7}
+#needle .ink{fill:none;stroke:var(--gold);stroke-width:1.6;stroke-linecap:round}
+/* o fio do mouse é um detalhe, não o assunto: fino e com transparência */
+#needle .rastro{fill:none;stroke:rgba(164,125,53,.34);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
+#needle .tip{fill:var(--ink)}
+#needle .tip-ring{fill:none;stroke:var(--gold);stroke-width:1}
+#needle.is-mouse{z-index:2;transition:opacity .4s ease}
+#needle.is-mouse .tip{fill:rgba(21,19,17,.5)}
+#needle.is-mouse .tip-ring{stroke:rgba(164,125,53,.4)}
+#needle.is-mouse .track,#needle.is-mouse .ink{display:none}
+main,header,footer{position:relative}
+/* o que o fio não atravessa */
+.hero figure,.hero figure video,.work,.about figure,.strip img,.studio figure,.rev__card,.btn,.ribbon,.nav{position:relative;z-index:3}
+
+/* ---------- ABERTURA ----------
+   O stencil vira a tattoo: os 19 traços do A são riscados um a um, como um
+   desenho a lápis no papel, e a arte final aparece por cima do esboço.
+   pathLength="1" no SVG normaliza os traços: todos riscam no mesmo tempo.
+   Só stroke-dashoffset, opacity e transform, nada repinta layout. */
+.intro{display:none}
+html.abertura{overflow:hidden}
+html.abertura .intro{display:grid;place-items:center;position:fixed;inset:0;z-index:200;
+  background:var(--paper);transition:opacity .7s ease}
+.intro.is-out{opacity:0}
+.intro__palco{position:relative;width:min(255px,46vw);aspect-ratio:422/468;
+  transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+.intro.is-out .intro__palco{transform:scale(1.05)}
+
+.intro__esboco,.intro__esboco svg{position:absolute;inset:0;width:100%;height:100%}
+.intro__esboco{color:#6B645B;animation:esbocoSai .55s ease 1.3s forwards}
+.intro__esboco path{stroke-dasharray:1;stroke-dashoffset:1;
+  animation:risca .7s cubic-bezier(.35,0,.25,1) forwards;
+  animation-delay:calc(.12s + var(--i) * .032s)}
+
+.intro__arte{position:absolute;inset:0;opacity:0;
+  background:url("../img/logo-a-tinta.webp") center/contain no-repeat;
+  animation:arteEntra .7s ease 1.2s forwards}
+
+.intro__risco{position:absolute;left:50%;bottom:-10%;width:min(210px,38vw);height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  transform:translateX(-50%) scaleX(0);
+  animation:introRisco .8s cubic-bezier(.2,.7,.2,1) 1.05s forwards}
+
+@keyframes risca{to{stroke-dashoffset:0}}
+@keyframes esbocoSai{to{opacity:0}}
+@keyframes arteEntra{to{opacity:1}}
+@keyframes introRisco{to{transform:translateX(-50%) scaleX(1)}}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color .3s}
+.nav.scrolled{border-bottom-color:var(--rule)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-block:16px}
+.logo{display:inline-flex;align-items:center;gap:13px;font-family:var(--display);font-size:22px;
+  text-decoration:none;letter-spacing:.01em}
+/* o nome vai num span só: solto, o gap do flex abria vão entre "Andre" e "Tattoo" */
+.logo__nome{white-space:nowrap}
+.logo i{color:var(--gold);font-style:italic}
+.logo__marca{flex:0 0 auto;width:42px;height:48px;
+  background:url("../img/logo-marca-tinta.webp") center/contain no-repeat;
+  transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+.logo:hover .logo__marca{transform:translateY(-2px)}
+@media (max-width:420px){.logo{font-size:19px;gap:10px}.logo__marca{width:34px;height:39px}}
+.nav ul{display:flex;gap:28px;list-style:none;margin:0;padding:0;font-size:14px}
+.nav ul a{position:relative;text-decoration:none;color:var(--ink-soft);transition:color .25s}
+.nav ul a::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--gold);
+  transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a:hover::after{transform:scaleX(1);transform-origin:left}
+/* Botões: o dourado sobe por dentro, o botão levanta um fio e o ponto cresce.
+   overflow+isolation seguram o preenchimento dentro da pílula. */
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--body);font-weight:500;font-size:15px;
+  text-decoration:none;padding:14px 22px;border-radius:999px;border:1px solid var(--ink);
+  background:var(--ink);color:var(--paper);position:relative;overflow:hidden;isolation:isolate;
+  transition:color .35s ease,border-color .35s ease,transform .35s cubic-bezier(.2,.7,.2,1)}
+.btn::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--gold-soft);
+  transform:translateY(101%);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.btn:hover,.btn:focus-visible{color:var(--ink);border-color:var(--gold-soft);transform:translateY(-2px)}
+.btn:hover::after,.btn:focus-visible::after{transform:translateY(0)}
+.btn:active{transform:translateY(0);transition-duration:.08s}
+.btn .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);
+  transition:transform .45s cubic-bezier(.2,.7,.2,1),background .35s ease}
+.btn:hover .dot,.btn:focus-visible .dot{background:var(--ink);transform:scale(1.55)}
+.btn:disabled{opacity:.55;pointer-events:none}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+.btn.sm{padding:10px 16px;font-size:14px}
+
+/* hero */
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;padding-block:44px 72px}
+.hero h1{font-size:clamp(38px,5.4vw,72px);margin:22px 0 30px;max-width:16ch}
+.hero p.lead{font-size:18px;color:var(--ink-soft);max-width:30ch}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.hero figure{margin:0;position:relative}
+/* Sem max-height aqui de propósito. Com ele, a caixa virava quase quadrada e
+   o object-fit cortava o vídeo DE NOVO, por cima do corte que já existe no
+   arquivo. Resultado: rosto gigante. Agora a largura manda e a altura segue
+   o 4/5, então o que se vê é exatamente o quadro que eu enquadrei. */
+.hero figure{max-width:390px;margin-left:auto}
+
+/* a "tv": quadrada e menor que a foto era, para não dominar o topo */
+.hero figure.tv{max-width:310px;margin-inline:auto}
+.tv .tv__tela{aspect-ratio:1;object-fit:cover;object-position:50% 50%;
+  border:1px solid var(--rule);background:var(--paper-2)}
+
+.hero figure img,.hero figure video{width:100%;aspect-ratio:4/5;height:auto;object-fit:cover;object-position:50% 43%;filter:contrast(1.04)}
+/* o vídeo já foi cortado em 4/5 no arquivo, então não precisa deslocar */
+.hero figure video{object-position:50% 50%;background:var(--paper-2)}
+.hero figure::after{content:"";position:absolute;inset:14px -14px -14px 14px;border:1px solid var(--gold-soft);z-index:-1}
+.hero figcaption{position:absolute;left:-18px;top:26px;background:var(--paper);padding:10px 14px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule)}
+.facts{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:40px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px;color:var(--ink-soft)}
+.facts span::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-right:9px;vertical-align:middle}
+
+/* faixa */
+.ribbon{border-block:1px solid var(--rule);overflow:hidden;background:var(--paper)}
+.ribbon .track{display:flex;gap:48px;white-space:nowrap;padding-block:18px;animation:roll 38s linear infinite;width:max-content}
+.ribbon span{font-family:var(--display);font-style:italic;font-size:26px}
+.ribbon span.s{color:var(--gold);font-style:normal}
+@keyframes roll{to{transform:translateX(-50%)}}
+
+/* secoes */
+section{padding-block:110px}
+.head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:52px}
+.head p{max-width:36ch;color:var(--ink-soft)}
+.head p.frase{font-family:var(--display);font-style:italic;font-size:clamp(18px,2vw,23px);
+  line-height:1.35;color:var(--ink);max-width:30ch}
+
+/* trabalhos */
+/* Galeria: todas as peças do mesmo tamanho, três por fileira.
+   Flex em vez de grade: quando sobra peça na última fileira, ela fica
+   centralizada, em vez de encostada na esquerda com buraco ao lado. */
+.gallery{display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
+.work{flex:0 0 calc((100% - 32px) / 3);margin:0;position:relative;overflow:hidden;cursor:zoom-in;
+  background:var(--paper-2);border:0;padding:0;text-align:left;font:inherit;color:inherit;
+  aspect-ratio:3/4}
+.work img{width:100%;height:100%;object-fit:cover;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.work:hover img{transform:scale(1.04)}
+.work .cap{position:absolute;left:12px;bottom:12px;background:var(--paper);padding:6px 10px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  opacity:0;transform:translateY(6px);transition:.35s}
+.work:hover .cap,.work:focus-visible .cap{opacity:1;transform:none}
+.gallery-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-top:36px;font-size:15px;color:var(--ink-soft)}
+
+/* blocos de cor: seções inteiras no verde-oliva, para a página não ficar toda branca.
+   Dentro do bloco os tokens escurecem, o dourado claro não tem contraste sobre o oliva. */
+/* ---------- CLUBE 15 ----------
+   É o único bloco escuro do site, e isso é proposital: numa página de papel
+   claro, uma seção invertida vira o ponto de parada do olho sem precisar de
+   cor berrante nenhuma. Também é de onde a logo veio, prata sobre preto.
+
+   A inversão é feita nos TOKENS, não regra por regra: o que era tinta vira
+   papel e o papel vira tinta. Com isso .btn, .btn.ghost, .eyebrow e o itálico
+   dourado se acertam sozinhos aqui dentro. */
+.clube{
+  background:#151311;
+  --ink:#F3F1EC;
+  --paper:#151311;
+  --ink-soft:#A49D92;
+  --rule:rgba(243,241,236,.20);
+  --gold:#C9A862;
+  --gold-soft:#A47D35;
+  color:var(--ink)}
+.clube__topo{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap}
+.clube__contador{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.clube__vagas{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold)}
+.clube__resumo{font-size:19px;line-height:1.65;color:var(--ink-soft);max-width:56ch;margin-top:30px}
+
+/* os quinze traços: cheio é vaga com dono, vazado é vaga aberta.
+   A inclinação é a mesma da agulha que costura a página. */
+.clube__marcas,.selo__marcas{display:inline-flex;gap:5px;align-items:center}
+.marca{width:4px;height:26px;border:1px solid var(--gold);border-radius:1px;
+  transform:skewX(-12deg);opacity:.5;transition:background .4s ease,opacity .4s ease}
+.marca.is-presa{background:var(--gold);opacity:1}
+
+.inclui{list-style:none;margin:48px 0 0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:28px 30px}
+.inclui__item{border-top:1px solid var(--rule);padding-top:18px}
+.inclui__item h3{font-size:21px;margin-bottom:9px}
+.inclui__item p{font-size:14.5px;line-height:1.65;color:var(--ink-soft)}
+.clube__acao{display:flex;flex-wrap:wrap;gap:12px;margin-top:48px}
+
+/* a capa da página do clube: tem um filho só, então a grade de duas
+   colunas do hero vira coluna única aqui */
+.clube--capa{padding-block:0}   /* o wrap abaixo já dá o respiro; somar os dois estica demais */
+.clube--capa .wrap{grid-template-columns:1fr;padding-block:62px 84px}
+.clube--capa h1{margin:20px 0 0;max-width:18ch}
+.clube--capa .clube__contador{flex-direction:row;align-items:center;gap:18px;margin-top:32px}
+.clube--capa .clube__resumo{margin-top:26px}
+.clube--capa .clube__acao{margin-top:40px}
+
+/* o selo do topo: avisa que o clube existe sem tomar a primeira dobra */
+.selo{display:inline-flex;align-items:center;gap:14px;margin-top:26px;
+  padding:11px 18px;border:1px solid var(--rule);border-radius:999px;
+  text-decoration:none;position:relative;z-index:3;
+  transition:border-color .35s ease,transform .35s cubic-bezier(.2,.7,.2,1)}
+.selo:hover,.selo:focus-visible{border-color:var(--gold-soft);transform:translateY(-2px)}
+.selo .marca{height:15px;width:3px}
+.selo__txt{font-family:var(--mono);font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-soft)}
+.selo__txt i{color:var(--rule);font-style:normal}
+.selo__txt b{color:var(--gold);font-weight:500}
+.selo__seta{width:16px;height:1px;background:var(--gold);
+  transition:width .35s cubic-bezier(.2,.7,.2,1)}
+.selo:hover .selo__seta{width:26px}
+
+.bloco{background:var(--bloco);
+  --rule:rgba(21,19,17,.22);
+  --ink-soft:#413D35;
+  --gold:#5F4A1C;
+  --gold-soft:#6E5520;
+  --paper-2:#BDC396}
+
+/* sobre */
+.about .grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:72px;align-items:center}
+.about figure{margin:0}
+.about figure img{width:100%;aspect-ratio:3/4;max-height:520px;object-fit:cover;object-position:50% 20%}
+.about .text p{font-size:19px;line-height:1.7;max-width:46ch;margin-top:22px}
+.about .text p.big{font-family:var(--display);font-size:clamp(28px,3.4vw,40px);line-height:1.2;color:var(--ink);margin-top:26px}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:72px}
+.strip img{width:100%;aspect-ratio:1;object-fit:cover}
+
+/* avaliacoes do google */
+.score{display:flex;align-items:center;gap:24px;flex-wrap:wrap;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);padding-block:26px;margin-bottom:44px}
+.score__n{font-family:var(--display);font-size:clamp(54px,7vw,92px);line-height:.88}
+.stars{color:var(--gold);letter-spacing:.2em;font-size:17px;line-height:1}
+.score__t{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px}
+.score .btn{margin-left:auto}
+.rev.sem-cards .score{margin-bottom:0}
+.rev__list{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.rev__card{margin:0;border:1px solid var(--rule);background:var(--paper-2);padding:26px 24px}
+/* Mesma razão da FAQ: aqui é parágrafo de verdade, 40 palavras vezes seis
+   cartões. A Bodoni cansa nesse tamanho e avaliação é para ser lida. */
+.rev__card p{font-size:16px;line-height:1.62;margin:14px 0 18px;color:#2E2A25}
+.rev__card cite{font-style:normal;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);display:flex;flex-direction:column;gap:5px}
+.rev__card cite span{color:var(--gold)}
+
+/* processo */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink)}
+.step{padding:34px 28px 10px 0;border-right:1px solid var(--rule);min-width:0}
+.step + .step{padding-left:28px}
+.step:last-child{border-right:0}
+.step .n{font-family:var(--display);font-style:italic;font-size:64px;line-height:1;color:var(--gold)}
+.step h3{font-size:30px;margin:18px 0 12px;line-height:1.1}
+.step p{color:var(--ink-soft);max-width:30ch}
+.note{margin-top:44px;font-size:15px;color:var(--ink-soft);display:flex;align-items:center;gap:12px}
+.note::before{content:"";width:28px;height:1px;background:var(--gold)}
+
+/* duvidas: sanfona, abre uma por vez */
+.acc{border-top:1px solid var(--rule)}
+.acc__item{border-bottom:1px solid var(--rule)}
+.acc__item summary{display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:clamp(18px,2.4vw,24px) 0;cursor:pointer;list-style:none;
+  /* Aqui NÃO entra a Bodoni. Ela é Didone: o traço fino some abaixo de uns
+     28px e a pergunta fica custosa de ler. Título grande é com ela, pergunta
+     de FAQ é para ser lida de relance, então vai na fonte de texto. */
+  font-family:var(--body);font-weight:500;font-size:clamp(17px,1.9vw,21px);
+  color:var(--ink);line-height:1.35;letter-spacing:-.005em;
+  transition:color .3s}
+.acc__item summary::-webkit-details-marker{display:none}
+.acc__item summary:hover{color:var(--gold)}
+.acc__item summary i{position:relative;flex:0 0 15px;height:15px}
+.acc__item summary i::before,.acc__item summary i::after{content:"";position:absolute;background:var(--gold);
+  transition:transform .4s cubic-bezier(.2,.7,.2,1),opacity .3s}
+.acc__item summary i::before{left:0;top:7px;width:15px;height:1px}
+.acc__item summary i::after{left:7px;top:0;width:1px;height:15px}
+.acc__item[open] summary i::after{transform:scaleY(0);opacity:0}
+.acc__item[open] summary{color:var(--gold)}
+.acc__corpo{overflow:hidden;animation:accAbre .45s cubic-bezier(.2,.7,.2,1)}
+.acc__corpo p{margin:0 0 24px;max-width:68ch;color:var(--ink-soft);font-size:16px;line-height:1.7}
+.acc__corpo strong{color:var(--ink);font-weight:600}
+@keyframes accAbre{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+/* formulario do agendamento */
+.form{margin-top:clamp(36px,5vw,56px);border:1px solid var(--rule);background:var(--paper);
+  padding:clamp(24px,3.4vw,40px)}
+.form__topo{font-family:var(--display);font-size:clamp(20px,2.4vw,26px);color:var(--ink);
+  margin-bottom:28px;max-width:34ch;line-height:1.25}
+.form__grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 26px}
+.campo{display:block}
+.campo--largo{grid-column:1 / -1}
+.campo>span{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:9px}
+.campo>span i{font-style:normal;text-transform:none;letter-spacing:.02em;opacity:.75}
+.campo input,.campo textarea{width:100%;background:transparent;color:var(--ink);border:0;
+  border-bottom:1px solid var(--rule);padding:9px 2px;font-family:var(--body);font-size:16px;
+  transition:border-color .3s}
+.campo textarea{resize:vertical;line-height:1.55}
+.campo input::placeholder,.campo textarea::placeholder{color:color-mix(in srgb,var(--ink-soft) 55%,transparent)}
+.campo input:focus,.campo textarea:focus{outline:0;border-bottom-color:var(--gold)}
+.idade{display:flex;align-items:flex-start;gap:10px;margin-top:26px;cursor:pointer;
+  font-size:14px;color:var(--ink-soft)}
+.idade input{appearance:none;-webkit-appearance:none;flex:0 0 17px;width:17px;height:17px;margin:2px 0 0;
+  border:1px solid var(--rule);background:transparent;position:relative;cursor:pointer;transition:.25s}
+.idade input:checked{background:var(--ink);border-color:var(--ink)}
+.idade input:checked::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;
+  border:solid var(--paper);border-width:0 1.5px 1.5px 0;transform:rotate(42deg)}
+.form__pe{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:28px;
+  padding-top:24px;border-top:1px solid var(--rule)}
+.form__erro{font-size:13.5px;color:#9B3A2A;margin:0}
+.form.is-enviado{opacity:.65}
+@media (max-width:720px){.form__grid{grid-template-columns:1fr}.form__pe .btn{width:100%;justify-content:center}}
+
+/* estudio */
+.studio .grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:stretch}
+.studio figure{margin:0}
+.studio figure img{width:100%;height:100%;min-height:420px;object-fit:cover}
+.info{display:flex;flex-direction:column;justify-content:center}
+.info dl{margin:36px 0 0;display:grid;gap:0}
+.info dl div{display:grid;grid-template-columns:130px 1fr;gap:18px;padding-block:18px;border-bottom:1px solid var(--rule)}
+.info dt{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);padding-top:3px}
+.info dd{margin:0;font-size:17px}
+.info dd a{text-decoration:none;border-bottom:1px solid var(--gold-soft)}
+.info .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+
+/* final */
+.final{position:relative;isolation:isolate;text-align:center;padding-block:140px}
+/* a marca por trás da chamada final: presença sem roubar a leitura */
+.final::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:url("../img/logo-a-tinta.webp") center 44%/min(440px,64vw) no-repeat;opacity:.09}
+.foot__id{display:inline-flex;align-items:center;gap:14px}
+.foot__marca{flex:0 0 auto;width:40px;height:45px;
+  background:url("../img/logo-marca-tinta.webp") center/contain no-repeat}
+.final h2{font-size:clamp(46px,8vw,104px);max-width:12ch;margin:22px auto 34px}
+.final p{color:var(--ink-soft);margin:0 auto 36px;max-width:38ch}
+footer{border-top:1px solid var(--rule)}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;
+  padding-block:30px;font-size:13px;color:var(--ink-soft)}
+footer a{text-decoration:none}
+.foot__txt{display:flex;flex-direction:column;gap:3px}
+.foot__txt b{font-family:var(--display);font-weight:400;font-size:17px;color:var(--ink);letter-spacing:.02em}
+.redes{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;margin:0;padding:0}
+.redes a{display:inline-flex;align-items:center;gap:9px;color:var(--ink-soft);transition:color .25s}
+.redes a:hover{color:var(--ink)}
+.redes__ico{flex:0 0 auto;width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.5;
+  transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.redes a:hover .redes__ico{transform:translateY(-3px)}
+.redes__ico--cheio{fill:currentColor;stroke:none}
+.redes__ico .cheio{fill:currentColor;stroke:none}
+@media (max-width:620px){footer .wrap{gap:18px}.redes{gap:10px 18px;font-size:12.5px}}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:100;background:color-mix(in srgb,var(--paper) 96%,transparent);display:flex;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lb img{max-height:86vh;max-width:min(92vw,900px);object-fit:contain;box-shadow:0 30px 60px -30px rgba(21,19,17,.45)}
+.lb button{position:absolute;background:var(--paper);border:1px solid var(--rule);border-radius:999px;width:46px;height:46px;font-size:20px;cursor:pointer;color:var(--ink)}
+.lb .x{top:calc(18px + env(safe-area-inset-top,0px));right:calc(18px + env(safe-area-inset-right,0px))}
+.lb .prev{left:calc(18px + env(safe-area-inset-left,0px))}.lb .next{right:calc(18px + env(safe-area-inset-right,0px))}
+.lb .lbcap{position:absolute;bottom:calc(22px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+
+/* whatsapp flutuante */
+.float{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:40;box-shadow:0 14px 30px -14px rgba(21,19,17,.5);opacity:0;pointer-events:none;transform:translateY(10px);transition:.35s}
+.float.on{opacity:1;pointer-events:auto;transform:none}
+
+/* entrada suave */
+.reveal{transition:transform 1.05s cubic-bezier(.2,.7,.2,1),opacity .9s ease}
+.js .reveal.pre{transform:translateY(34px) scale(.985);opacity:0}
+
+@media (max-width:900px){
+  .nav ul{display:none}
+  .hero .wrap{grid-template-columns:1fr;gap:44px;padding-block:28px 72px}
+  .hero figure{order:-1;max-width:520px}
+  .hero figcaption{left:12px;top:14px}
+  .gallery{gap:10px}
+  .work{flex:0 0 calc((100% - 10px) / 2)}
+  .rev__list{grid-template-columns:1fr}
+  .score .btn{margin-left:0}
+  .about .grid,.studio .grid{grid-template-columns:1fr;gap:40px}
+  .strip{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:48px}
+  .steps{grid-template-columns:1fr}
+  .step,.step + .step{padding:28px 0;border-right:0;border-bottom:1px solid var(--rule)}
+  section{padding-block:80px}
+  .info dl div{grid-template-columns:96px 1fr}
+  .studio figure img{min-height:320px;aspect-ratio:4/5}
+  .work .cap{opacity:1;transform:none}
+  .clube__topo{flex-direction:column;align-items:flex-start;gap:28px}
+  .clube__acao{flex-direction:column;align-items:stretch}
+  .clube__acao .btn{justify-content:center}
+  .selo{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .ribbon .track{animation:none}
+  .reveal,.work img{transition:none}
+  .js .reveal.pre{transform:none;opacity:1}
+  .btn,.btn::after,.btn .dot,.nav ul a::after,.redes__ico{transition:none}
+  .btn:hover{transform:none}
+}
+
+/* notebook de tela baixa: encolhe o topo para o botao caber na primeira tela */
+@media (min-width:901px) and (max-height:880px){
+  .hero .wrap{padding-block:28px 52px;gap:44px}
+  .hero h1{font-size:clamp(40px,5.2vw,68px);margin:14px 0 18px}
+  .hero p.lead{font-size:17px}
+  .hero .ctas{margin-top:26px}
+  .hero figure img{max-height:56svh}
+  .facts{margin-top:28px;padding-top:18px}
+}
+
+/* Campo isca do anti-robô da Netlify. Pessoa nenhuma vê, robô preenche e o
+   envio é descartado. Fica fora do fluxo e fora do leitor de tela. */
+.esconde{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
