@@ -444,3 +444,43 @@ footer a{text-decoration:none}
 /* Campo isca do anti-robô da Netlify. Pessoa nenhuma vê, robô preenche e o
    envio é descartado. Fica fora do fluxo e fora do leitor de tela. */
 .esconde{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+
+/* =====================================================================
+   PÁGINAS DE ESTILO — realismo, retrato, cobertura e Zona Leste.
+   Geradas por build.py a partir de paginas.py. Reusam tudo o que já
+   existe no site; aqui está só o que elas precisam a mais.
+   ===================================================================== */
+
+/* O hero da home é grid de duas colunas (texto + vídeo). Nestas páginas
+   só há texto, então vira coluna única. */
+.hero--texto{padding-block:0}
+.hero--texto .wrap{grid-template-columns:1fr;padding-block:40px 64px}
+.hero--texto h1{max-width:18ch}
+/* o lead da home tem 30ch porque divide a largura com o vídeo; aqui a
+   coluna é inteira e a linha pode respirar */
+.hero--texto p.lead{max-width:48ch;margin-top:22px}
+
+/* caminho de volta para a home, acima do H1 */
+.migalhas{font-family:var(--mono);font-size:12px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:20px}
+.migalhas a{color:inherit;text-decoration:none;border-bottom:1px solid var(--rule);
+  padding-bottom:2px;transition:color .25s}
+.migalhas a:hover{color:var(--gold)}
+.migalhas span[aria-hidden]{opacity:.5;margin:0 4px}
+
+/* Texto corrido. O h2 padrão chega a 72px, que é demais para uma página
+   com quatro seções seguidas de leitura; e a linha precisa de medida
+   curta para não cansar. */
+.conteudo{padding-block:76px}
+.conteudo h2{font-size:clamp(28px,3.6vw,46px);max-width:20ch;margin-bottom:24px}
+.conteudo p{font-size:17px;line-height:1.66;color:var(--ink-soft);
+  max-width:62ch;margin-bottom:18px}
+.conteudo p:last-child{margin-bottom:0}
+
+@media (max-width:860px){
+  .conteudo{padding-block:56px}
+  .conteudo p{font-size:16px}
+  .hero--texto .wrap{padding-block:20px 40px}
+  .hero--texto p.lead{max-width:none}
+}

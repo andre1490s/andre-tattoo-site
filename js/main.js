@@ -51,6 +51,39 @@
   })();
 
   /* ---------------------------------------------------------------
+     0b. MEDIÇÃO: só carrega se houver ID em dados.js > medicao.ga4.
+     Sem ID, nada é baixado e nenhum cookie é criado.
+     `medir()` é seguro de chamar sempre: sem Analytics, não faz nada.
+  --------------------------------------------------------------- */
+  var medir = function(){};
+  (function medicao(){
+    var id = (D.medicao || {}).ga4;
+    if(!id) return;
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', id);
+
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+    document.head.appendChild(s);
+
+    medir = function(evento, dados){
+      try { gtag('event', evento, dados || {}); } catch(e){}
+    };
+
+    /* Clique em qualquer botão de WhatsApp. O atributo data-wa diz de onde
+       saiu: topo, obras, estudio, barra ou clube. É assim que se descobre
+       qual parte da página traz cliente. */
+    document.addEventListener('click', function(ev){
+      var a = ev.target.closest && ev.target.closest('a[href*="wa.me"]');
+      if(a) medir('whatsapp_clique', { lugar: a.getAttribute('data-wa') || 'sem-nome' });
+    }, true);
+  })();
+
+  /* ---------------------------------------------------------------
      1. CONTATO: um número só, vindo do dados.js
   --------------------------------------------------------------- */
   (function contato(){
@@ -93,6 +126,10 @@
        dados.js e esqueceu de rodar o build, remontamos aqui — o site continua
        certo para quem visita, so volta a ficar invisivel para os rastreadores
        ate o build rodar de novo. */
+    /* Nas paginas de estilo a galeria e uma selecao propria, menor que a lista
+       inteira: o JS nao pode substitui-la pela lista do dados.js. */
+    if(box.getAttribute('data-fonte') === 'pagina') return;
+
     if(box.querySelectorAll('.work').length === lista.length) return;
 
     box.innerHTML = lista.map(function(o, i){
@@ -137,7 +174,8 @@
 
     /* Mesma logica da galeria: o build.py ja gravou as duvidas e o JSON-LD do
        FAQ no index.html. So remontamos se o HTML estiver defasado. */
-    var jaNoHtml = caixa.querySelectorAll('details').length === lista.length;
+    var jaNoHtml = caixa.getAttribute('data-fonte') === 'pagina'
+                || caixa.querySelectorAll('details').length === lista.length;
 
     if(!jaNoHtml) caixa.innerHTML = lista.map(function(d){
       return '<details class="acc__item reveal"><summary><span>' + esc(d.p) + '</span>' +
@@ -148,7 +186,11 @@
     var itens = [].slice.call(caixa.querySelectorAll('details'));
     itens.forEach(function(d){
       d.addEventListener('toggle', function(){
-        if(d.open) itens.forEach(function(o){ if(o !== d) o.open = false; });
+        if(d.open){
+          itens.forEach(function(o){ if(o !== d) o.open = false; });
+          var t = d.querySelector('summary span');
+          medir('duvida_abrir', { pergunta: t ? t.textContent.trim() : '' });
+        }
       });
     });
 
@@ -384,7 +426,11 @@
     var im = works[cur].querySelector('img');
     lbImg.src = im.src; lbImg.alt = im.alt; lbCap.textContent = works[cur].dataset.cap;
   }
-  works.forEach(function(w,i){ w.addEventListener('click', function(){ last = w; show(i); lb.hidden = false; document.body.style.overflow='hidden'; lb.querySelector('.x').focus(); }); });
+  works.forEach(function(w,i){ w.addEventListener('click', function(){
+    last = w; show(i); lb.hidden = false; document.body.style.overflow='hidden';
+    lb.querySelector('.x').focus();
+    medir('galeria_ampliar', { peca: w.getAttribute('data-cap') || '' });
+  }); });
   function close(){ lb.hidden = true; document.body.style.overflow=''; if(last) last.focus(); }
   lb.querySelector('.x').addEventListener('click', close);
   lb.querySelector('.prev').addEventListener('click', function(e){ e.stopPropagation(); show(cur-1); });
@@ -456,6 +502,8 @@
       if(d.whatsapp.replace(/\D/g, '').length < 10){ erro.textContent = 'Confira o seu WhatsApp com DDD.'; return; }
       if(f.elements.idade && !f.elements.idade.checked){ erro.textContent = 'Confirme que você tem 18 anos ou mais.'; return; }
       erro.textContent = '';
+
+      medir('form_envio', { origem: d.origem });
 
       var url = 'https://wa.me/' + num + '?text=' + encodeURIComponent(recado(d));
       var janela = num ? window.open(url, '_blank') : null;

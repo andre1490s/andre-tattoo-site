@@ -224,6 +224,137 @@ precisa ser atualizada para incluir esse passo.
 
 ---
 
+## Correção — descrições de tatuagem revertidas
+
+Na fase 2 eu reescrevi 4 textos ALT olhando as fotos. O André corrigiu: a peça
+`fera` **é um lobo, não um dragão**, e aquela foto é um close para mostrar o
+detalhe do pontilhismo, não a peça inteira.
+
+As 4 descrições voltaram ao que o André tinha escrito. **Lição registrada: não
+interpretar o conteúdo das fotos.** Quem sabe o que cada peça é, e por que cada
+foto foi enquadrada daquele jeito, é ele. As descrições das páginas novas usam
+os textos do `dados.js` como estão, sem reinterpretação.
+
+Única coisa que ficou do bloco de imagens da fase 2: `width`, `height` e o
+sitemap — que são técnicos e não dependem de interpretar nada.
+
+---
+
+## Fase 4 — Medição (feita antes da 3, para as páginas novas já nascerem medidas)
+
+O site não media **nada**: sem Analytics, sem Search Console, sem evento de
+conversão. Era impossível dizer de onde vinha um cliente.
+
+### Como ligar
+
+Em `js/dados.js`, bloco `medicao`:
+
+```js
+medicao: { ga4: "" },
+```
+
+Cole o ID do Google Analytics (`G-XXXXXXXXXX`, em Admin → Fluxos de dados →
+"ID da métrica") e pronto. **Enquanto estiver vazio, nada é baixado e nenhum
+cookie é criado** — zero peso extra. Testado: com o campo vazio, zero
+requisições ao Google e `dataLayer` nem existe.
+
+### Eventos que passam a ser registrados sozinhos
+
+| Evento | Quando | O que leva junto |
+|---|---|---|
+| `whatsapp_clique` | qualquer botão de WhatsApp | `lugar`: topo, obras, estudio, barra ou clube |
+| `form_envio` | formulário de orçamento enviado | `origem` |
+| `galeria_ampliar` | abriu uma foto | `peca` |
+| `duvida_abrir` | abriu uma pergunta do FAQ | `pergunta` |
+
+O `lugar` do `whatsapp_clique` é o que responde a pergunta que importa: **qual
+parte da página traz cliente.** Se o botão do rodapé converte mais que o do
+topo, isso muda o desenho da página.
+
+### Search Console
+
+A etiqueta de verificação ficou **comentada** no `<head>` do `index.html`, com o
+passo a passo. Não dá para preencher sem a sua conta: o Google gera um código
+único por propriedade.
+
+---
+
+## Fase 3 — Quatro páginas novas
+
+O site tinha **2 URLs**. Passou a ter **6**.
+
+| URL | Alvo de busca |
+|---|---|
+| `/realismo-preto-e-cinza` | tatuagem realismo preto e cinza, tatuador especialista em realismo |
+| `/tatuagem-retrato-realista` | tatuagem de retrato realista, tatuagem de rosto, homenagem |
+| `/cobertura-de-tatuagem` | cobertura de tatuagem, cover up, reforma de tatuagem |
+| `/tatuador-zona-leste-sp` | tatuador zona leste, Penha, Tatuapé, Itaquera, Vila Matilde |
+
+Cada uma tem: um H1 só, 4 seções de texto (450 a 540 palavras), galeria própria
+selecionada do portfólio, 4 perguntas específicas, migalha de volta para a home,
+links para as 3 páginas irmãs e CTA de WhatsApp no topo e no fim.
+
+**Dados estruturados por página:** `BreadcrumbList` + `FAQPage` próprio +
+`Service` + referência ao estúdio pelo `@id`, ligando tudo ao grafo da home.
+
+A home ganhou uma seção **"O que eu faço"** com links para as quatro — os links
+são gerados pelo build, então nunca saem de sincronia.
+
+### O conteúdo
+
+Escrito respeitando `contexto/marca.md`: **nenhum preço**, nenhuma faixa, nenhum
+"a partir de"; nada de "único" ou "exclusivo"; nenhum número de clientes, tempo
+de carreira ou prêmio inventado; maori não aparece.
+
+O que sustenta cada página é informação verdadeira que o André já pratica: a
+política de sinal, retoque a partir de 40 dias, 18 anos com documento, um
+trabalho grande por dia, material descartável aberto na frente do cliente,
+desenho feito depois da data marcada.
+
+Nenhuma página promete resultado, e a de cobertura diz abertamente que **às
+vezes a resposta é não** — o que é diferença real em relação aos concorrentes.
+
+### Bug encontrado e corrigido no caminho
+
+As quatro páginas apareciam com **12 fotos** em vez das 6, 4, 3 e 6 escolhidas.
+A rede de segurança da fase 2 estava substituindo a galeria curada pela lista
+inteira do `dados.js`, porque os números não batiam.
+
+Correção: o contêiner agora declara de onde vem o conteúdo.
+`data-fonte="dados"` na home (compara com o `dados.js` e remonta se houver
+diferença) e `data-fonte="pagina"` nas páginas de estilo (o JS não toca). Mesma
+lógica para o FAQ.
+
+### Testes executados
+
+| Teste | Resultado |
+|---|---|
+| Um H1 por página | 4/4 ✓ |
+| Galeria com a seleção certa | 6, 4, 3, 6 ✓ |
+| Imagens sem `width`/`height` | 0 ✓ |
+| JSON-LD por página | Breadcrumb + FAQ + Service + estúdio ✓ |
+| Canonical correto | 4/4 ✓ |
+| Links internos por página | 4 ✓ |
+| Home ainda com 12 fotos | ✓ |
+| Lightbox e acordeão | ✓ |
+| Scroll horizontal no celular | nenhum ✓ |
+| Erros de console | nenhum ✓ |
+| Medição sem ID | 0 requisições, sem cookie ✓ |
+| Medição com ID | gtag carregado, 4 eventos disparando ✓ |
+
+### Também nesta fase
+
+`clube-15.html` passou a escrever **André** com acento (título, OG, logo e
+rodapé), igual ao resto do site.
+
+### ⚠️ Conferir antes de publicar
+
+A página da Zona Leste afirma que **a Vila Matilde é atendida pela Linha
+3-Vermelha do metrô** e que **há estacionamento na rua**. Escrevi a partir do
+endereço, mas quem conhece o bairro é você: confirme as duas frases.
+
+---
+
 ## Adendo — dados confirmados pelo Perfil da Empresa (08/11/2026)
 
 Print do painel do Google enviado pelo André trouxe três correções:

@@ -52,6 +52,21 @@ window.DADOS = {
       r:"Durma bem, coma antes de vir e evite álcool nas 24 horas anteriores. Roupa confortável que dê acesso à região. Sessão longa tem pausa, é só pedir. Pode trazer um acompanhante." }
   ],
 
+  /* ---------- 3b. MEDIÇÃO ----------
+     Cole o ID quando criar a conta. Vazio = nada é carregado: zero peso extra
+     e nenhum cookie. Enquanto estiver vazio, o site não mede nada.
+
+     ga4: no Google Analytics, em Admin > Fluxos de dados, o campo
+          "ID da métrica". Formato G-XXXXXXXXXX.
+
+     Com o ID preenchido, estes eventos passam a ser registrados sozinhos:
+       whatsapp_clique   (com o lugar do botão: topo, obras, estudio, barra, clube)
+       form_envio        (formulário de orçamento enviado)
+       galeria_ampliar   (abriu uma foto no lightbox)
+       duvida_abrir      (abriu uma pergunta do FAQ)
+  ------------------------------------- */
+  medicao: { ga4: "" },
+
   /* ---------- 4. GOOGLE ----------
      nota e total aparecem no bloco de avaliações.
      url: link do Perfil da Empresa (botão "Ver no Google"); vazio esconde o botão.
@@ -147,11 +162,11 @@ window.DADOS = {
     { img:"retrato-oculos", cap:"Realismo · Retrato",   alt:"Retrato masculino de óculos em realismo preto e cinza, com respingos de tinta, na panturrilha" },
     { img:"poseidon", cap:"Realismo · Poseidon",       alt:"Rosto de Poseidon com tridente e grega, em realismo preto e cinza no antebraço" },
     { img:"leao",     cap:"Realismo · Leão",           alt:"Leão em realismo preto e cinza no antebraço, com cruz e figura em oração entre as nuvens" },
-    { img:"fera",     cap:"Blackwork · Dragão",        alt:"Dragão em blackwork com sombreado em pontilhismo no antebraço" },
+    { img:"fera",     cap:"Blackwork · Pontilhismo",   alt:"Peça em blackwork com sombreado em pontilhismo no antebraço" },
     { img:"arcanjo",  cap:"Realismo · Arcanjo",        alt:"Arcanjo em realismo preto e cinza no antebraço" },
-    { img:"rostos",   cap:"Realismo · Rostos",         alt:"Rostos de estátuas gregas em realismo preto e cinza, com efeito de mármore partido, no antebraço" },
-    { img:"retrato",  cap:"Realismo · Retrato",        alt:"Retrato masculino de boné em realismo preto e cinza no braço, com o Cristo Redentor abaixo" },
-    { img:"urso",     cap:"Realismo · Urso",           alt:"Urso com lua e montanhas em realismo preto e cinza no braço" },
+    { img:"rostos",   cap:"Realismo · Rostos",         alt:"Composição de rostos em realismo no antebraço" },
+    { img:"retrato",  cap:"Realismo · Retrato",        alt:"Retrato realista no braço" },
+    { img:"urso",     cap:"Realismo · Urso",           alt:"Urso com lua e montanhas em realismo no braço" },
     { img:"cigana",   cap:"Realismo · Cigana",         alt:"Cigana de capuz com lua na testa, segurando uma galáxia, em realismo preto e cinza no braço" },
     { img:"raposa",   cap:"Blackwork · Raposa",        alt:"Raposa em blackwork pela perna" },
     { img:"pet",      cap:"Realismo colorido · Pet",   alt:"Cachorrinho em realismo colorido com flores no antebraço" }
