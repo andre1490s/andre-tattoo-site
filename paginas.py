@@ -240,9 +240,8 @@ PAGINAS = [
      "Av. Melchert, 606 — Vila Matilde, São Paulo (SP), CEP 03508-000. É um estúdio de "
      "rua na Zona Leste, não uma sala dentro de um prédio comercial: você chega, toca e "
      "entra.",
-     "A Vila Matilde é atendida pela Linha 3-Vermelha do metrô, o que facilita para quem "
-     "vem de outras regiões da cidade sem carro. Quem vem dirigindo encontra "
-     "estacionamento na rua."
+     "A Vila Matilde é atendida pela Linha 3-Vermelha do metrô, o que facilita para "
+     "quem vem de outras regiões da cidade sem carro."
    ]),
    ("Quem costuma vir aqui", [
      "A maior parte dos clientes vem dos bairros vizinhos — Penha, Tatuapé, Itaquera, "
